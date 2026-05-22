@@ -11,8 +11,6 @@ app.secret_key = "change-this-secret-key"
 
 DATA_FILE = Path(__file__).with_name("Loldle Data.xlsx")
 
-# Result order must match your notebook:
-# Gender, Position, Species, Resource, Range, Region, Year
 COLUMNS = ["Gender", "Position", "Species", "Resource", "Range", "Region", "Year"]
 
 

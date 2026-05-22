@@ -109,8 +109,7 @@
           </div>
 
           <p class="hint">
-            Submit each guess one at a time. The app keeps narrowing the
-            candidate list until you reset.
+            Submit each guess one at a time. The app keeps narrowing the candidate list until you reset.
           </p>
 
           <div class="actions">
@@ -156,9 +155,7 @@
               <span class="badge badge-{{ item.Resource }}">Resource</span>
               <span class="badge badge-{{ item.Range }}">Range</span>
               <span class="badge badge-{{ item.Region }}">Region</span>
-              <span class="badge badge-{{ item.Year }}"
-                >Year: {{ item.Year }}</span
-              >
+              <span class="badge badge-{{ item.Year }}">Year: {{ item.Year }}</span>
             </div>
           </div>
           {% endfor %}
@@ -173,9 +170,7 @@
       <section class="card">
         <div class="stats">
           <h2>Remaining candidates</h2>
-          <span class="pill"
-            >{{ count }} candidate{{ '' if count == 1 else 's' }}</span
-          >
+          <span class="pill">{{ count }} candidate{{ '' if count == 1 else 's' }}</span>
         </div>
 
         <div class="table-wrap">
