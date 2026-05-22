@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LoLdle Solver</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <main class="app">
+      <header class="header">
+        <h1>LoLdle Solver</h1>
+        <p>Enter your guess result and narrow the possible champions.</p>
+      </header>
+
+      <section class="card">
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" id="guessForm">
+          <div class="form-row">
+            <div class="field">
+              <label for="champion_name">Champion</label>
+
+              <input
+                list="champion_list"
+                name="champion_name"
+                id="champion_name"
+                placeholder="Type champion..."
+                autocomplete="off"
+                required
+              />
+
+              <datalist id="champion_list">
+                {% for name in champion_names %}
+                <option value="{{ name }}"></option>
+                {% endfor %}
+              </datalist>
+            </div>
+
+            <div class="field">
+              <label for="Gender">Gender</label>
+              <select name="Gender" id="Gender" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Position">Position</label>
+              <select name="Position" id="Position" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Species">Species</label>
+              <select name="Species" id="Species" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Resource">Resource</label>
+              <select name="Resource" id="Resource" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Range">Range</label>
+              <select name="Range" id="Range" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Region">Region</label>
+              <select name="Region" id="Region" required>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="Year">Year</label>
+              <select name="Year" id="Year" required>
+                <option value="green">Green</option>
+                <option value="newer">Up</option>
+                <option value="older">Down</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="hint">
+            Submit each guess one at a time. The app keeps narrowing the
+            candidate list until you reset.
+          </p>
+
+          <div class="actions">
+            <button class="primary-btn" type="submit">Apply guess</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <form method="post" action="{{ url_for('reset') }}">
+          <button class="reset-btn" type="submit">Reset candidates</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="stats">
+          <h2>Guess history</h2>
+          <span class="pill"
+            >{{ history|length }} guess{{ '' if history|length == 1 else 'es'
+            }}</span
+          >
+        </div>
+
+        {% if history %}
+        <div class="history-list">
+          {% for item in history %}
+          <div class="history-item">
+            <div class="history-main">
+              <div class="history-number">#{{ loop.index }}</div>
+              <div>
+                <div class="history-champion">{{ item.champion_name }}</div>
+                <div class="history-count">
+                  {{ item.count }} candidate{{ '' if item.count == 1 else 's' }}
+                  remaining
+                </div>
+              </div>
+            </div>
+
+            <div class="history-badges">
+              <span class="badge badge-{{ item.Gender }}">Gender</span>
+              <span class="badge badge-{{ item.Position }}">Position</span>
+              <span class="badge badge-{{ item.Species }}">Species</span>
+              <span class="badge badge-{{ item.Resource }}">Resource</span>
+              <span class="badge badge-{{ item.Range }}">Range</span>
+              <span class="badge badge-{{ item.Region }}">Region</span>
+              <span class="badge badge-{{ item.Year }}"
+                >Year: {{ item.Year }}</span
+              >
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-history">
+          No guesses yet. Submit your first guess above.
+        </p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <div class="stats">
+          <h2>Remaining candidates</h2>
+          <span class="pill"
+            >{{ count }} candidate{{ '' if count == 1 else 's' }}</span
+          >
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                {% for column in columns %}
+                <th>{{ column }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for row in candidates %}
+              <tr>
+                <td class="champion-name">{{ row.Name }}</td>
+                {% for column in columns %}
+                <td>{{ row[column] }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const championInput = document.getElementById("champion_name");
+      const guessForm = document.getElementById("guessForm");
+
+      const validChampions = [
+        {% for name in champion_names %}
+          "{{ name }}",
+        {% endfor %}
+      ];
+
+      guessForm.addEventListener("submit", function(event) {
+        const typedChampion = championInput.value.trim();
+
+        if (!validChampions.includes(typedChampion)) {
+          event.preventDefault();
+          championInput.setCustomValidity("Please choose a champion from the list.");
+          championInput.reportValidity();
+        } else {
+          championInput.setCustomValidity("");
+        }
+      });
+
+      championInput.addEventListener("input", function() {
+        championInput.setCustomValidity("");
+      });
+    </script>
+  </body>
+</html>
